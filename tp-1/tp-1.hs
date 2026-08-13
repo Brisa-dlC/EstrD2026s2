@@ -30,7 +30,16 @@ maxDelPar (x,y) = if x > y
                     else y
 
 {-2. De 4 ejemplos de expresiones diferentes que denoten el número 10, utilizando en cada expresión a todas las funciones del punto anterior.
-Ejemplo: maxDePar (divisionYResto (suma 5 5) (sucesor 0))-}
+Ejemplo: maxDePar (divisionYResto (suma 5 5) (sucesor 0))
+
+1- maxDelPar (divisionYResto (sucesor (sumar 4 5)) 1)
+sumar 4 5 = 9 → sucesor 9 = 10 → división 10 1 = (10,0) → max(10,0) = 10
+2- sucesor (maxDelPar (divisionYResto (sumar 7 3) 2))
+sumar 7 3 = 10 → división 10 2 = (5,0) → max(5,0) = 5 → sucesor 5 = 10
+3- maxDelPar (sucesor (sumar 8 1), div 6 3)
+sumar 8 1 = 9 → sucesor 9 = 10 → max(10,2) = 10
+4- sucesor (maxDelPar (sumar 6 2, div 8 4))
+sumar 6 2 = 8 → división entera 8 4 = 2 → max(8,2) = 8 → sucesor 8 = 10-}
 
 --3. Tipos enumerativos--
 {-1. Definir el tipo de dato Dir, con las alternativas Norte, Sur, Este y Oeste. Luego implementar
@@ -166,7 +175,7 @@ nombre (P n _) = n
 
 {-edad :: Persona -> Int
 Devuelve la edad de una persona-}
-edad :: Persona -> String
+edad :: Persona -> Int
 edad (P _ e) = e
 
 {-crecer :: Persona -> Persona
@@ -203,7 +212,8 @@ data Entrenador = E String Pokemon Pokemon
                 --  Nombre Pokemon1 Pokemon2
  deriving Show
 
-data TipoDePokemon = Agua | Fuego | Tierra
+data TipoDePokemon = Agua | Fuego | Planta
+ deriving Show
 
 {-superaA :: Pokemon -> Pokemon -> Bool
 Dados dos Pokémon indica si el primero, en base al tipo, es superior al segundo. Agua
@@ -212,10 +222,87 @@ superaA :: Pokemon -> Pokemon -> Bool
 superaA p1 p2 = superaTipo (tipo p1) (tipo p2)
 
 superaTipo :: TipoDePokemon -> TipoDePokemon -> Bool
+superaTipo Agua Fuego = True
+superaTipo Fuego Planta = True
+superaTipo Planta Agua = True
+superaTipo _ _ = False
 
-
+tipo :: Pokemon -> TipoDePokemon
+tipo (Po p _) = p
 
 {-cantidadDePokemonDe :: TipoDePokemon -> Entrenador -> Int
 Devuelve la cantidad de Pokémon de determinado tipo que posee el entrenador.
 juntarPokemon :: (Entrenador, Entrenador) -> [Pokemon]
 Dado un par de entrenadores, devuelve a sus Pokémon en una lista.-}
+cantidadDePokemonDe :: TipoDePokemon -> Entrenador -> Int
+cantidadDePokemonDe p (E _ p1 p2) = unoSiCoinciden p (tipo p1) + unoSiCoinciden p (tipo p2)
+
+unoSiCoinciden :: TipoDePokemon -> TipoDePokemon -> Int
+unoSiCoinciden Agua Agua = 1
+unoSiCoinciden Fuego Fuego = 1
+unoSiCoinciden Planta Planta = 1
+unoSiCoinciden _ _ = 0
+
+{-juntarPokemon :: (Entrenador, Entrenador) -> [Pokemon]
+Dado un par de entrenadores, devuelve a sus Pokémon en una lista.-}
+juntarPokemon :: (Entrenador, Entrenador) -> [Pokemon]
+juntarPokemon (e1, e2) = pokemonesDe e1 ++ pokemonesDe e2
+
+pokemonesDe :: Entrenador -> [Pokemon]
+pokemonesDe (E _ p1 p2) = [p1,p2]
+{-5. Funciones polimórficas
+1. Defina las siguientes funciones polimórficas:
+a) loMismo :: a -> a
+Dado un elemento de algún tipo devuelve ese mismo elemento.-}
+loMismo :: a -> a
+loMismo a = a
+
+{-b) siempreSiete :: a -> Int
+Dado un elemento de algún tipo devuelve el número 7.-}
+siempreSiete :: a -> Int
+siempreSiete a = 7
+
+{-c) swap :: (a, b) -> (b, a)
+Dadas una tupla, invierte sus componentes.
+¿Por qué existen dos variables de tipo diferentes? 
+Porque podrían ser de distinto tipo, ejemplo (1, a)-}
+swap :: (a, b) -> (b, a)
+swap (a, b) = (b, a)
+
+-- 2. Responda la siguiente pregunta: ¿Por qué estas funciones son polimórficas?
+-- Porque funcionan con cualquier tipo de dato
+
+{-6. Pattern matching sobre listas
+1. Defina las siguientes funciones polimórficas utilizando pattern matching sobre listas (no
+utilizar las funciones que ya vienen con Haskell):
+2. estaVacia :: [a] -> Bool
+Dada una lista de elementos, si es vacía devuelve True, sino devuelve False.
+Definida en Haskell como null.-}
+estaVacia :: [a] -> Bool
+estaVacia [] = True
+estaVacia _ = False
+
+{-3. elPrimero :: [a] -> a
+Dada una lista devuelve su primer elemento.
+Definida en Haskell como head.
+Nota: tener en cuenta que el constructor de listas es :-}
+elPrimero :: [a] -> a
+--Precondición: La lista no puede ser vacía
+elPrimero (a:_) = a
+elPrimero [] = error "La lista no puede ser vacía"
+
+{-4. sinElPrimero :: [a] -> [a]
+Dada una lista devuelve esa lista menos el primer elemento.
+Definida en Haskell como tail.
+Nota: tener en cuenta que el constructor de listas es :-}
+sinElPrimero :: [a] -> [a]
+--Precondición: La lista no puede ser vacía
+sinElPrimero (_:as) = as
+sinElPrimero [] = error "La lista no puede ser vacía"
+
+{-5. splitHead :: [a] -> (a, [a])
+Dada una lista devuelve un par, donde la primera componente es el primer elemento de la
+lista, y la segunda componente es esa lista pero sin el primero.
+Nota: tener en cuenta que el constructor de listas es :-}
+splitHead :: [a] -> (a, [a])
+splitHead a = (elPrimero a, sinElPrimero a)
