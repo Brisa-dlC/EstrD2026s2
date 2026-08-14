@@ -200,9 +200,11 @@ data TipoDePokemon = Agua | Fuego | Planta
  deriving Show
 
 data Pokemon = Po TipoDePokemon Int
+--                TipoDePokemon Energía
  deriving Show
 
 data Entrenador = E String [Pokemon]
+--                  Nombre Pokemones 
  deriving Show
 
 {-Como puede observarse, ahora los entrenadores tienen una cantidad de Pokemon arbitraria.
@@ -234,22 +236,29 @@ tipo (Po p _) = p
 Dados dos entrenadores, indica la cantidad de Pokemon de cierto tipo pertenecientes al
 primer entrenador, que le ganarían a todos los Pokemon del segundo entrenador.-}
 cuantosDeTipo_De_LeGananATodosLosDe_ :: TipoDePokemon -> Entrenador -> Entrenador -> Int
-cuantosDeTipo_De_LeGananATodosLosDe_ t e1 e2 = cuantosDe_LeGananATodosLosDe_ pokemonesDeTipo t (pokemones e1) pokemones e2
+cuantosDeTipo_De_LeGananATodosLosDe_ t e1 e2 = cantDe_QueLeGananATodosLosDe_ (pokemonesDeTipo t (pokemones e1)) (pokemones e2)
 
-cuantosDe_LeGananATodosLosDe_ :: [Pokemon] -> [Pokemon] -> Int
-cuantosDe_LeGananATodosLosDe_ [] ys = 0
-cuantosDe_LeGananATodosLosDe_ (x:xs) ys = if superaATodos x ys
-                                            then 1 + cuantosDe_LeGananATodosLosDe_ xs ys
-                                            else cuantosDe_LeGananATodosLosDe_ xs ys
+cantDe_QueLeGananATodosLosDe_ :: [Pokemon] -> [Pokemon] -> Int
+cantDe_QueLeGananATodosLosDe_ [] ys = 0
+cantDe_QueLeGananATodosLosDe_ ps [] = length ps
+cantDe_QueLeGananATodosLosDe_ (p:ps) ys = if superaATodos p ys
+                                            then 1 + cantDe_QueLeGananATodosLosDe_ ps ys
+                                            else cantDe_QueLeGananATodosLosDe_ ps ys
 
 pokemones :: Entrenador -> [Pokemon]
 pokemones (E _ ps) = ps
 
 pokemonesDeTipo :: TipoDePokemon -> [Pokemon] -> [Pokemon]
 pokemonesDeTipo t [] = []
-pokemonesDeTipo t (p:ps) = if esTipo t p
+pokemonesDeTipo t (p:ps) = if esMismoTipo t (tipo p)
                                 then p : pokemonesDeTipo t ps
                                 else pokemonesDeTipo t ps
+
+esMismoTipo :: TipoDePokemon -> TipoDePokemon -> Bool
+esMismoTipo Agua Agua = True
+esMismoTipo Fuego Fuego = True
+esMismoTipo Planta Planta = True
+esMismoTipo _ _ = False
 
 superaATodos :: Pokemon -> [Pokemon] -> Bool
 superaATodos p [] = False
@@ -266,23 +275,71 @@ superaTipo _ _ = False
 
 {-esMaestroPokemon :: Entrenador -> Bool
 Dado un entrenador, devuelve True si posee al menos un Pokémon de cada tipo posible.-}
+esMaestroPokemon :: Entrenador -> Bool
+esMaestroPokemon (E _ ps) = hayAlMenosUn_ Agua ps && hayAlMenosUn_ Fuego ps && hayAlMenosUn_ Planta ps
 
+hayAlMenosUn_ :: TipoDePokemon -> [Pokemon] -> Bool
+hayAlMenosUn_ t (p:ps) = esMismoTipo t (tipo p) || hayAlMenosUn_ t ps
 
 {-3. El tipo de dato Rol representa los roles (desarollo o management) de empleados IT dentro
 de una empresa de software, junto al proyecto en el que se encuentran. Así, una empresa es
-una lista de personas con diferente rol. La definición es la siguiente:
+una lista de personas con diferente rol. La definición es la siguiente:-}
 data Seniority = Junior | SemiSenior | Senior
-data Proyecto = ConsProyecto String
+ deriving Show
+
+data Proyecto = Pr String
+ deriving (Show, Eq)
+
 data Rol = Developer Seniority Proyecto | Management Seniority Proyecto
-data Empresa = ConsEmpresa [Rol]
-Definir las siguientes funciones sobre el tipo Empresa:
+ deriving Show
+
+data Empresa = Em [Rol]
+ deriving Show
+
+{-Definir las siguientes funciones sobre el tipo Empresa:
 proyectos :: Empresa -> [Proyecto]
-Dada una empresa denota la lista de proyectos en los que trabaja, sin elementos repetidos.
-losDevSenior :: Empresa -> [Proyecto] -> Int
+Dada una empresa denota la lista de proyectos en los que trabaja, sin elementos repetidos.-}
+proyectos :: Empresa -> [Proyecto]
+proyectos (Em rs) = proyectosDe rs
+
+proyectosDe :: [Rol] -> [Proyecto]
+proyectosDe [] = []
+proyectosDe (r:rs) = proyecto r : proyectosDe rs
+
+proyecto :: Rol -> Proyecto
+proyecto (Developer _ p) = p 
+proyecto (Management _ p) = p 
+
+{-losDevSenior :: Empresa -> [Proyecto] -> Int
 Dada una empresa indica la cantidad de desarrolladores senior que posee, que pertecen
-además a los proyectos dados por parámetro.
+además a los proyectos dados por parámetro.-}
+losDevSenior :: Empresa -> [Proyecto] -> Int
+losDevSenior (Em rs) [] = 0
+losDevSenior (Em rs) ps = losDe_QuePertenecenA (losDevSeniorDe rs) ps
+
+losDe_QuePertenecenA :: [Rol] -> [Proyecto] -> Int
+losDe_QuePertenecenA [] _ = 0
+losDe_QuePertenecenA (r:rs) ps = if elem (proyecto r) ps
+                                    then 1 + losDe_QuePertenecenA rs ps
+                                    else losDe_QuePertenecenA rs ps
+
+losDevSeniorDe :: [Rol] -> [Rol]
+losDevSeniorDe [] = []
+losDevSeniorDe (r:rs) = if esDevSenior r 
+                            then r : losDevSeniorDe rs
+                            else losDevSeniorDe rs
+
+esDevSenior :: Rol -> Bool
+esDevSenior (Developer Senior _) = True
+esDevSenior _ = False
+
+{-cantQueTrabajanEn :: [Proyecto] -> Empresa -> Int
+Indica la cantidad de empleados que trabajan en alguno de los proyectos dados.-}
 cantQueTrabajanEn :: [Proyecto] -> Empresa -> Int
-Indica la cantidad de empleados que trabajan en alguno de los proyectos dados.
-asignadosPorProyecto :: Empresa -> [(Proyecto, Int)]
+cantQueTrabajanEn ps (E rs) = losDe_QuePertenecenA rs ps
+
+{-asignadosPorProyecto :: Empresa -> [(Proyecto, Int)]
 Devuelve una lista de pares que representa a los proyectos (sin repetir) junto con su
 cantidad de personas involucradas.-}
+asignadosPorProyecto :: Empresa -> [(Proyecto, Int)]
+asignadosPorProyecto (E rs) = asignadosPorProyectoDe_
