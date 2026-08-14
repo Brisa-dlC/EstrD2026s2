@@ -336,10 +336,20 @@ esDevSenior _ = False
 {-cantQueTrabajanEn :: [Proyecto] -> Empresa -> Int
 Indica la cantidad de empleados que trabajan en alguno de los proyectos dados.-}
 cantQueTrabajanEn :: [Proyecto] -> Empresa -> Int
-cantQueTrabajanEn ps (E rs) = losDe_QuePertenecenA rs ps
+cantQueTrabajanEn ps (Em rs) = losDe_QuePertenecenA rs ps
 
 {-asignadosPorProyecto :: Empresa -> [(Proyecto, Int)]
 Devuelve una lista de pares que representa a los proyectos (sin repetir) junto con su
 cantidad de personas involucradas.-}
 asignadosPorProyecto :: Empresa -> [(Proyecto, Int)]
-asignadosPorProyecto (E rs) = asignadosPorProyectoDe_
+asignadosPorProyecto (Em rs) = asignadosPorProyectoDe_ rs
+
+asignadosPorProyectoDe_ :: [Rol] -> [(Proyecto, Int)]
+asignadosPorProyectoDe_ [] = []
+asignadosPorProyectoDe_ (r:rs) = agregarAsignado r (asignadosPorProyectoDe_ rs)
+
+agregarAsignado :: Rol -> [(Proyecto, Int)] -> [(Proyecto, Int)]
+agregarAsignado r [] = (proyecto r, 1):[]
+agregarAsignado r (t:ts) = if (proyecto r) == fst t
+                                then (fst t, snd t + 1) : ts
+                                else agregarAsignado r ts
