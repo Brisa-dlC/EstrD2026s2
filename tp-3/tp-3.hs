@@ -165,19 +165,26 @@ perteneceT e (NodeT x ti td) = e == x || perteneceT e ti || perteneceT e td
 Dados un elemento e y un árbol binario devuelve la cantidad de elementos del árbol que son
 iguales a e.-}
 aparicionesT :: Eq a => a -> Tree a -> Int
-aparicionesT e EmptyT =
-apar
+aparicionesT e EmptyT = 0
+aparicionesT e (NodeT x ti td) = unoSiCeroSino (e == x) + aparicionesT e ti + aparicionesT e td
 
 {-6. leaves :: Tree a -> [a]
 Dado un árbol devuelve los elementos que se encuentran en sus hojas.
-NOTA: en este tipo se define como hoja a un nodo con dos hijos vacíos.
-7. heightT :: Tree a -> Int
+NOTA: en este tipo se define como hoja a un nodo con dos hijos vacíos.-}
+leaves :: Tree a -> [a]
+leaves EmptyT = []
+leaves (NodeT x EmptyT EmptyT) = x
+leaves (NodeT _ ti td) = leaves ti ++ leaves td
+
+{-7. heightT :: Tree a -> Int
 Dado un árbol devuelve su altura.
 Nota: la altura de un árbol (height en inglés), también llamada profundidad, es
-la cantidad de niveles del árbol1
-. La altura para EmptyT es 0, y para una hoja
-es 1.
-8. mirrorT :: Tree a -> Tree a
+la cantidad de niveles del árbol1 . La altura para EmptyT es 0, y para una hoja es 1.-}
+heightT :: Tree a -> Int
+heightT EmptyT =
+heightT (NodeT x ti td) =
+
+{-8. mirrorT :: Tree a -> Tree a
 Dado un árbol devuelve el árbol resultante de intercambiar el hijo izquierdo con
 el derecho, en cada nodo del árbol.
 9. toList :: Tree a -> [a]
