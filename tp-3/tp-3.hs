@@ -113,7 +113,16 @@ Dado un rango de pasos, indica la cantidad de tesoros que hay en ese rango. Por 
 el rango es 3 y 5, indica la cantidad de tesoros que hay entre hacer 3 pasos y hacer 5. Están
 incluidos tanto 3 como 5 en el resultado.-}
 cantTesorosEntre :: Int -> Int -> Camino -> Int
-cantTesorosEntre 0 n c = 
+--Precondición: El primer numero dado no puede ser menor al segundo numero dado
+cantTesorosEntre 0 n2 c = tesorosAca c + cantTesorosEntre 0 (n2 - 1) c
+cantTesorosEntre 0 0 c = tesorosAca c
+cantTesorosEntre n1 n2 c = if n1 <= n2
+                            then cantTesorosEntre (n1 - 1) (n2 - 1) c
+                            else error "el primer numero no puede ser mayo al segundo"
+
+tesorosAca :: Camino -> Int
+tesorosAca (Cofre obs _) = cantTesorosEn obs
+tesorosAca _ = 0
 
 --2. Tipos arbóreos
 {-2.1. Árboles binarios
