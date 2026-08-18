@@ -51,32 +51,71 @@ ponerN n c ce = ponerN (n - 1) c (poner c ce)
 Tenemos los siguientes tipos de datos-}
 
 data Objeto = Cacharro | Tesoro
- deriving Show
+ deriving (Show, Eq)
 
 data Camino = Fin | Cofre [Objeto] Camino | Nada Camino
  deriving Show
 
+camino1 :: Camino
+camino1 = (Nada (Cofre [Cacharro] (Nada Fin)))
+
+camino2 :: Camino
+camino2 = (Nada (Cofre [Cacharro] (Nada (Cofre [Cacharro, Tesoro, Tesoro] Fin))))
+
 {-Definir las siguientes funciones:
 hayTesoro :: Camino -> Bool
 Indica si hay un cofre con un tesoro en el camino.-}
+hayTesoro :: Camino -> Bool
+hayTesoro (Fin) = False
+hayTesoro (Nada c) = hayTesoro c
+hayTesoro (Cofre obs c) = hayTesoroEnCofre obs || hayTesoro c
 
+hayTesoroEnCofre :: [Objeto] -> Bool
+hayTesoroEnCofre [] = False
+hayTesoroEnCofre (o:obs) = o == Tesoro || hayTesoroEnCofre obs
 
 {-pasosHastaTesoro :: Camino -> Int
 Indica la cantidad de pasos que hay que recorrer hasta llegar al primer cofre con un tesoro.
 Si un cofre con un tesoro está al principio del camino, la cantidad de pasos a recorrer es 0.
-Precondición: tiene que haber al menos un tesoro.
-hayTesoroEn :: Int -> Camino -> Bool
+Precondición: tiene que haber al menos un tesoro.-}
+pasosHastaTesoro :: Camino -> Int
+-- Precondición: hay al menos un tesoro en el camino.
+pasosHastaTesoro (Fin) = 0
+pasosHastaTesoro (Nada c) = 1 + pasosHastaTesoro c
+pasosHastaTesoro (Cofre obs c) = if hayTesoroEnCofre obs
+                                    then 0
+                                    else 1 + pasosHastaTesoro c
+
+{-hayTesoroEn :: Int -> Camino -> Bool
 Indica si hay un tesoro en una cierta cantidad exacta de pasos. Por ejemplo, si el número de
-pasos es 5, indica si hay un tesoro en 5 pasos.
+pasos es 5, indica si hay un tesoro en 5 pasos.-}
+hayTesoroEn :: Int -> Camino -> Bool
+hayTesoroEn 0 (Cofre obs _) = hayTesoroEnCofre obs
+hayTesoroEn n (Nada c) = hayTesoroEn (n - 1) c
+hayTesoroEn n (Cofre _ c) = hayTesoroEn (n - 1) c
+hayTesoroEn 0 _ = False
+hayTesoroEn _ (Fin) = False
+
+{-alMenosNTesoros :: Int -> Camino -> Bool
+Indica si hay al menos "n" tesoros en el camino.-}
 alMenosNTesoros :: Int -> Camino -> Bool
-Indica si hay al menos "n" tesoros en el camino.
-(desafío) cantTesorosEntre :: Int -> Int -> Camino -> Int
+alMenosNTesoros 0 _ = True
+alMenosNTesoros n (Nada c) = alMenosNTesoros n c
+alMenosNTesoros n (Cofre obs c) = n <= cantTesorosEn obs || alMenosNTesoros (n - (cantTesorosEn obs)) c
+alMenosNTesoros _ _ = False
+
+cantTesorosEn :: [Objeto] -> Int
+cantTesorosEn [] = 0
+cantTesorosEn (o:obs) = unoSiCeroSino (o == Tesoro) + cantTesorosEn obs
+
+{-(desafío) cantTesorosEntre :: Int -> Int -> Camino -> Int
 Dado un rango de pasos, indica la cantidad de tesoros que hay en ese rango. Por ejemplo, si
 el rango es 3 y 5, indica la cantidad de tesoros que hay entre hacer 3 pasos y hacer 5. Están
 incluidos tanto 3 como 5 en el resultado.-}
+cantTesorosEntre :: Int -> Int -> Camino -> Int
 
-{-2. Tipos arbóreos
-2.1. Árboles binarios
+--2. Tipos arbóreos
+{-2.1. Árboles binarios
 Dada esta definición para árboles binarios
 data Tree a = EmptyT | NodeT a (Tree a) (Tree a)
 defina las siguientes funciones utilizando recursión estructural según corresponda:
