@@ -241,9 +241,11 @@ cuantosDeTipo_De_LeGananATodosLosDe_ t e1 e2 = cantDe_QueLeGananATodosLosDe_ (po
 cantDe_QueLeGananATodosLosDe_ :: [Pokemon] -> [Pokemon] -> Int
 cantDe_QueLeGananATodosLosDe_ [] ys = 0
 cantDe_QueLeGananATodosLosDe_ ps [] = length ps
-cantDe_QueLeGananATodosLosDe_ (p:ps) ys = if superaATodos p ys
-                                            then 1 + cantDe_QueLeGananATodosLosDe_ ps ys
-                                            else cantDe_QueLeGananATodosLosDe_ ps ys
+cantDe_QueLeGananATodosLosDe_ (p:ps) ys = unoSiCeroSino (superaATodos p ys) + cantDe_QueLeGananATodosLosDe_ ps ys
+
+unoSiCeroSino :: Bool -> Int
+unoSiCeroSino True = 1
+unoSiCeroSino False = 0
 
 pokemones :: Entrenador -> [Pokemon]
 pokemones (E _ ps) = ps
@@ -319,9 +321,7 @@ losDevSenior (Em rs) ps = losDe_QuePertenecenA (losDevSeniorDe rs) ps
 
 losDe_QuePertenecenA :: [Rol] -> [Proyecto] -> Int
 losDe_QuePertenecenA [] _ = 0
-losDe_QuePertenecenA (r:rs) ps = if elem (proyecto r) ps
-                                    then 1 + losDe_QuePertenecenA rs ps
-                                    else losDe_QuePertenecenA rs ps
+losDe_QuePertenecenA (r:rs) ps = unoSiCeroSino (elem (proyecto r) ps) + losDe_QuePertenecenA rs ps
 
 losDevSeniorDe :: [Rol] -> [Rol]
 losDevSeniorDe [] = []
