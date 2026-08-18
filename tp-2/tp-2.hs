@@ -51,12 +51,11 @@ pertenece e (x:xs) = (x == e) || pertenece e xs
 Dados un elemento e y una lista xs cuenta la cantidad de apariciones de e en xs.-}
 apariciones :: Eq a => a -> [a] -> Int
 apariciones _ [] = 0
-apariciones e (x:xs) = unoSiEsIgual e x + apariciones e xs
+apariciones e (x:xs) = unoSiCeroSino (e == x) + apariciones e xs
 
-unoSiEsIgual :: Eq a => a -> a -> Int
-unoSiEsIgual a b = if a == b
-                        then 1
-                        else 0
+unoSiCeroSino :: Bool -> Int
+unoSiCeroSino True = 1
+unoSiCeroSino False = 0
 
 {-9. losMenoresA :: Int -> [Int] -> [Int]
 Dados un número n y una lista xs, devuelve todos los elementos de xs que son menores a n.-}
@@ -197,7 +196,7 @@ elMasViejo (x:xs) = if edad x > edad (elMasViejo xs)
 
 {-2. Modificaremos la representación de Entreador y Pokemon de la práctica anterior de la siguiente manera:-}
 data TipoDePokemon = Agua | Fuego | Planta
- deriving Show
+ deriving (Show, Eq)
 
 data Pokemon = Po TipoDePokemon Int
 --                TipoDePokemon Energía
@@ -221,13 +220,7 @@ cantPokemonDe t (E _ ps) = cantidadDePokesDe t ps
 
 cantidadDePokesDe :: TipoDePokemon -> [Pokemon] -> Int
 cantidadDePokesDe t [] = 0
-cantidadDePokesDe t (p:ps) = unoSiCoinciden t (tipo p) + cantidadDePokesDe t ps  
-
-unoSiCoinciden :: TipoDePokemon -> TipoDePokemon -> Int
-unoSiCoinciden Agua Agua = 1
-unoSiCoinciden Fuego Fuego = 1
-unoSiCoinciden Planta Planta = 1
-unoSiCoinciden _ _ = 0
+cantidadDePokesDe t (p:ps) = unoSiCeroSino (t == (tipo p)) + cantidadDePokesDe t ps   
 
 tipo :: Pokemon -> TipoDePokemon
 tipo (Po p _) = p
@@ -243,24 +236,14 @@ cantDe_QueLeGananATodosLosDe_ [] ys = 0
 cantDe_QueLeGananATodosLosDe_ ps [] = length ps
 cantDe_QueLeGananATodosLosDe_ (p:ps) ys = unoSiCeroSino (superaATodos p ys) + cantDe_QueLeGananATodosLosDe_ ps ys
 
-unoSiCeroSino :: Bool -> Int
-unoSiCeroSino True = 1
-unoSiCeroSino False = 0
-
 pokemones :: Entrenador -> [Pokemon]
 pokemones (E _ ps) = ps
 
 pokemonesDeTipo :: TipoDePokemon -> [Pokemon] -> [Pokemon]
 pokemonesDeTipo t [] = []
-pokemonesDeTipo t (p:ps) = if esMismoTipo t (tipo p)
+pokemonesDeTipo t (p:ps) = if t == (tipo p)
                                 then p : pokemonesDeTipo t ps
                                 else pokemonesDeTipo t ps
-
-esMismoTipo :: TipoDePokemon -> TipoDePokemon -> Bool
-esMismoTipo Agua Agua = True
-esMismoTipo Fuego Fuego = True
-esMismoTipo Planta Planta = True
-esMismoTipo _ _ = False
 
 superaATodos :: Pokemon -> [Pokemon] -> Bool
 superaATodos p [] = False
@@ -281,7 +264,7 @@ esMaestroPokemon :: Entrenador -> Bool
 esMaestroPokemon (E _ ps) = hayAlMenosUn_ Agua ps && hayAlMenosUn_ Fuego ps && hayAlMenosUn_ Planta ps
 
 hayAlMenosUn_ :: TipoDePokemon -> [Pokemon] -> Bool
-hayAlMenosUn_ t (p:ps) = esMismoTipo t (tipo p) || hayAlMenosUn_ t ps
+hayAlMenosUn_ t (p:ps) = t == (tipo p) || hayAlMenosUn_ t ps
 
 {-3. El tipo de dato Rol representa los roles (desarollo o management) de empleados IT dentro
 de una empresa de software, junto al proyecto en el que se encuentran. Así, una empresa es
