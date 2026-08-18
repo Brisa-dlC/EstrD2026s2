@@ -60,7 +60,10 @@ camino1 :: Camino
 camino1 = (Nada (Cofre [Cacharro] (Nada Fin)))
 
 camino2 :: Camino
-camino2 = (Nada (Cofre [Cacharro] (Nada (Cofre [Cacharro, Tesoro, Tesoro] Fin))))
+camino2 = (Nada (Cofre [Cacharro, Tesoro] (Nada (Cofre [Cacharro, Tesoro, Tesoro] Fin))))
+
+camino3 :: Camino
+camino3 = (Cofre [Tesoro] Fin)
 
 {-Definir las siguientes funciones:
 hayTesoro :: Camino -> Bool
@@ -113,36 +116,59 @@ Dado un rango de pasos, indica la cantidad de tesoros que hay en ese rango. Por 
 el rango es 3 y 5, indica la cantidad de tesoros que hay entre hacer 3 pasos y hacer 5. Están
 incluidos tanto 3 como 5 en el resultado.-}
 cantTesorosEntre :: Int -> Int -> Camino -> Int
---Precondición: El primer numero dado no puede ser menor al segundo numero dado
-cantTesorosEntre 0 n2 c = tesorosAca c + cantTesorosEntre 0 (n2 - 1) c
-cantTesorosEntre 0 0 c = tesorosAca c
-cantTesorosEntre n1 n2 c = if n1 <= n2
-                            then cantTesorosEntre (n1 - 1) (n2 - 1) c
-                            else error "el primer numero no puede ser mayo al segundo"
+cantTesorosEntre _ _ (Fin) = 0
+cantTesorosEntre _ 0 c = tesorosEnEstePaso c
+cantTesorosEntre n1 n2 (Nada c) = cantTesorosEntre (n1 - 1) (n2 - 1) c
+cantTesorosEntre n1 n2 (Cofre obs c) = if n1 <= 0 
+                                        then cantTesorosEn obs + cantTesorosEntre n1 (n2 - 1) c 
+                                        else cantTesorosEntre (n1 - 1) (n2 - 1) c
 
-tesorosAca :: Camino -> Int
-tesorosAca (Cofre obs _) = cantTesorosEn obs
-tesorosAca _ = 0
+tesorosEnEstePaso :: Camino -> Int
+tesorosEnEstePaso (Cofre obs _) = cantTesorosEn obs
+tesorosEnEstePaso _ = 0
 
 --2. Tipos arbóreos
 {-2.1. Árboles binarios
-Dada esta definición para árboles binarios
+Dada esta definición para árboles binarios-}
+
 data Tree a = EmptyT | NodeT a (Tree a) (Tree a)
-defina las siguientes funciones utilizando recursión estructural según corresponda:
+ deriving Show
+
+{-defina las siguientes funciones utilizando recursión estructural según corresponda:
 1. sumarT :: Tree Int -> Int
-Dado un árbol binario de enteros devuelve la suma entre sus elementos.
-2. sizeT :: Tree a -> Int
+Dado un árbol binario de enteros devuelve la suma entre sus elementos.-}
+sumarT :: Tree Int -> Int
+sumarT EmptyT = 0
+sumarT (NodeT x ti td) = x + sumarT ti + sumarT td
+
+{-2. sizeT :: Tree a -> Int
 Dado un árbol binario devuelve su cantidad de elementos, es decir, el tamaño del árbol (size
-en inglés).
-3. mapDobleT :: Tree Int -> Tree Int
-Dado un árbol de enteros devuelve un árbol con el doble de cada número.
-4. perteneceT :: Eq a => a -> Tree a -> Bool
+en inglés).-}
+sizeT :: Tree a -> Int
+sizeT EmptyT = 0
+sizeT (NodeT x ti td) = 1 + sizeT ti + sizeT td
+
+{-3. mapDobleT :: Tree Int -> Tree Int
+Dado un árbol de enteros devuelve un árbol con el doble de cada número.-}
+mapDobleT :: Tree Int -> Tree Int
+mapDobleT EmptyT = EmptyT
+mapDobleT (NodeT x ti td) = NodeT (x * 2) (mapDobleT ti) (mapDobleT td)
+
+{-4. perteneceT :: Eq a => a -> Tree a -> Bool
 Dados un elemento y un árbol binario devuelve True si existe un elemento igual a ese en el
-árbol.
-5. aparicionesT :: Eq a => a -> Tree a -> Int
+árbol.-}
+perteneceT :: Eq a => a -> Tree a -> Bool
+perteneceT _ EmptyT = False
+perteneceT e (NodeT x ti td) = e == x || perteneceT e ti || perteneceT e td
+
+{-5. aparicionesT :: Eq a => a -> Tree a -> Int
 Dados un elemento e y un árbol binario devuelve la cantidad de elementos del árbol que son
-iguales a e.
-6. leaves :: Tree a -> [a]
+iguales a e.-}
+aparicionesT :: Eq a => a -> Tree a -> Int
+aparicionesT e EmptyT =
+apar
+
+{-6. leaves :: Tree a -> [a]
 Dado un árbol devuelve los elementos que se encuentran en sus hojas.
 NOTA: en este tipo se define como hoja a un nodo con dos hijos vacíos.
 7. heightT :: Tree a -> Int
