@@ -113,6 +113,7 @@ Dado un rango de pasos, indica la cantidad de tesoros que hay en ese rango. Por 
 el rango es 3 y 5, indica la cantidad de tesoros que hay entre hacer 3 pasos y hacer 5. Están
 incluidos tanto 3 como 5 en el resultado.-}
 cantTesorosEntre :: Int -> Int -> Camino -> Int
+cantTesorosEntre 0 n c = 
 
 --2. Tipos arbóreos
 {-2.1. Árboles binarios
