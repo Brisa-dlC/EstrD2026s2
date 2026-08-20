@@ -2,29 +2,72 @@
 de la Cerda Dominique-}
 
 {-1. Pizzas
-Tenemos los siguientes tipos de datos:
-data Pizza = Prepizza
-| Capa Ingrediente Pizza
-data Ingrediente = Salsa
-| Queso
-| Jamon
-| Aceitunas Int
-Denir las siguientes funciones:
+Tenemos los siguientes tipos de datos:-}
+
+data Pizza = Prepizza | Capa Ingrediente Pizza
+ deriving Show
+
+data Ingrediente = Salsa | Queso | Jamon | Aceitunas Int
+ deriving Show
+
+pizza :: Pizza
+pizza = Capa (Aceitunas 2) (Capa Salsa (Capa Queso (Capa Salsa Prepizza)))
+
+{-Definir las siguientes funciones:
 cantidadDeCapas :: Pizza -> Int
-Dada una pizza devuelve la cantidad de ingredientes
+Dada una pizza devuelve la cantidad de ingredientes-}
+cantidadDeCapas :: Pizza -> Int
+cantidadDeCapas Prepizza = 0
+cantidadDeCapas (Capa i p) = 1 + cantidadDeCapas p
+
+{-armarPizza :: [Ingrediente] -> Pizza
+Dada una lista de ingredientes construye una pizza-}
 armarPizza :: [Ingrediente] -> Pizza
-Dada una lista de ingredientes construye una pizza
+armarPizza [] = Prepizza
+armarPizza (i:is) = Capa i (armarPizza is)
+
+{-sacarJamon :: Pizza -> Pizza
+Le saca los ingredientes que sean jamón a la pizza-}
 sacarJamon :: Pizza -> Pizza
-Le saca los ingredientes que sean jamón a la pizza
-tieneSoloSalsaYQueso :: Pizza -> Bool
+sacarJamon Prepizza = Prepizza
+sacarJamon (Capa i p) = if esXIngrediente Jamon i
+                            then sacarJamon p
+                            else Capa i (sacarJamon p)
+
+esXIngrediente :: Ingrediente -> Ingrediente -> Bool
+esXIngrediente Salsa Salsa = True
+esXIngrediente Queso Queso = True
+esXIngrediente Jamon Jamon = True
+esXIngrediente (Aceitunas _) (Aceitunas _) = True
+esXIngrediente _ _ = False 
+
+{-tieneSoloSalsaYQueso :: Pizza -> Bool
 Dice si una pizza tiene solamente salsa y queso (o sea, no tiene de otros ingredientes. En
-particular, la prepizza, al no tener ningún ingrediente, debería dar verdadero.)
+particular, la prepizza, al no tener ningún ingrediente, debería dar verdadero.)-}
+tieneSoloSalsaYQueso :: Pizza -> Bool
+tieneSoloSalsaYQueso Prepizza = True
+tieneSoloSalsaYQueso (Capa i p) = esSalsaOQueso i && tieneSoloSalsaYQueso p
+
+esSalsaOQueso :: Ingrediente -> Bool
+esSalsaOQueso i = esXIngrediente Salsa i || esXIngrediente Queso i
+
+{-duplicarAceitunas :: Pizza -> Pizza
+Recorre cada ingrediente y si es aceitunas duplica su cantidad-}
 duplicarAceitunas :: Pizza -> Pizza
-Recorre cada ingrediente y si es aceitunas duplica su cantidad
-cantCapasPorPizza :: [Pizza] -> [(Int, Pizza)]
+duplicarAceitunas Prepizza = Prepizza
+duplicarAceitunas (Capa i p) = Capa (duplicarSiEsAceituna i) (duplicarAceitunas p)
+
+duplicarSiEsAceituna :: Ingrediente -> Ingrediente
+duplicarSiEsAceituna (Aceitunas n) = Aceitunas (n * 2)
+duplicarSiEsAceituna x = x
+
+{-cantCapasPorPizza :: [Pizza] -> [(Int, Pizza)]
 Dada una lista de pizzas devuelve un par donde la primera componente es la cantidad de
-ingredientes de la pizza, y la respectiva pizza como segunda componente.
-2. Mapa de tesoros (con bifurcaciones)
+ingredientes de la pizza, y la respectiva pizza como segunda componente.-}
+cantCapasPorPizza :: [Pizza] -> [(Int, Pizza)]
+
+
+{-2. Mapa de tesoros (con bifurcaciones)
 Un mapa de tesoros es un árbol con bifurcaciones que terminan en cofres. Cada bifurcación y
 cada cofre tiene un objeto, que puede ser chatarra o un tesoro.
 data Dir = Izq | Der
@@ -32,11 +75,11 @@ data Objeto = Tesoro | Chatarra
 data Cofre = Cofre [Objeto]
 data Mapa = Fin Cofre
 | Bifurcacion Cofre Mapa Mapa
-Denir las siguientes operaciones:
+Definir las siguientes operaciones:
 1. hayTesoro :: Mapa -> Bool
 Indica si hay un tesoro en alguna parte del mapa.
 2. hayTesoroEn :: [Dir] -> Mapa -> Bool
-Indica si al nal del camino hay un tesoro. Nota: el nal de un camino se representa con una
+Indica si al final del camino hay un tesoro. Nota: el final de un camino se representa con una
 lista vacía de direcciones.
 3. caminoAlTesoro :: Mapa -> [Dir]
 Indica el camino al tesoro. Precondición: existe un tesoro y es único.
