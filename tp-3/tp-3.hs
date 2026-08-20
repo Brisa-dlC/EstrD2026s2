@@ -134,6 +134,23 @@ Dada esta definición para árboles binarios-}
 data Tree a = EmptyT | NodeT a (Tree a) (Tree a)
  deriving Show
 
+tree :: Tree Int
+tree = NodeT 1 
+            (NodeT 2 EmptyT 
+                    EmptyT) 
+            (NodeT 3 EmptyT 
+                    (NodeT 4 EmptyT 
+                            EmptyT))
+
+
+{-Vista de tree
+        1
+/               \
+2               3
+                    \
+                    4
+-}
+
 {-defina las siguientes funciones utilizando recursión estructural según corresponda:
 1. sumarT :: Tree Int -> Int
 Dado un árbol binario de enteros devuelve la suma entre sus elementos.-}
@@ -173,7 +190,7 @@ Dado un árbol devuelve los elementos que se encuentran en sus hojas.
 NOTA: en este tipo se define como hoja a un nodo con dos hijos vacíos.-}
 leaves :: Tree a -> [a]
 leaves EmptyT = []
-leaves (NodeT x EmptyT EmptyT) = x
+leaves (NodeT x EmptyT EmptyT) = x:[]
 leaves (NodeT _ ti td) = leaves ti ++ leaves td
 
 {-7. heightT :: Tree a -> Int
@@ -181,26 +198,41 @@ Dado un árbol devuelve su altura.
 Nota: la altura de un árbol (height en inglés), también llamada profundidad, es
 la cantidad de niveles del árbol1 . La altura para EmptyT es 0, y para una hoja es 1.-}
 heightT :: Tree a -> Int
-heightT EmptyT =
-heightT (NodeT x ti td) =
+heightT EmptyT = 0
+heightT (NodeT x ti td) = 1 + max (heightT ti) (heightT td)
 
 {-8. mirrorT :: Tree a -> Tree a
 Dado un árbol devuelve el árbol resultante de intercambiar el hijo izquierdo con
-el derecho, en cada nodo del árbol.
-9. toList :: Tree a -> [a]
+el derecho, en cada nodo del árbol.-}
+mirrorT :: Tree a -> Tree a
+mirrorT EmptyT = EmptyT
+mirrorT (NodeT x ti td) = NodeT x (mirrorT td) (mirrorT ti)
+
+{-9. toList :: Tree a -> [a]
 Dado un árbol devuelve una lista que representa el resultado de recorrerlo en
 modo in-order.
 Nota: En el modo in-order primero se procesan los elementos del hijo izquierdo,
-luego la raiz y luego los elementos del hijo derecho.
-10. levelN :: Int -> Tree a -> [a]
+luego la raiz y luego los elementos del hijo derecho.-}
+toList :: Tree a -> [a]
+toList EmptyT = []
+toList (NodeT x ti td) = toList ti ++ [x] ++ toList td
+
+{-10. levelN :: Int -> Tree a -> [a]
 Dados un número n y un árbol devuelve una lista con los nodos de nivel n. El
 nivel de un nodo es la distancia que hay de la raíz hasta él. La distancia de la
 raiz a sí misma es 0, y la distancia de la raiz a uno de sus hijos es 1.
-Nota: El primer nivel de un árbol (su raíz) es 0.
-11. listPerLevel :: Tree a -> [[a]]
+Nota: El primer nivel de un árbol (su raíz) es 0.-}
+levelN :: Int -> Tree a -> [a]
+levelN _ EmptyT = []
+levelN 0 (NodeT x _ _) = [x]
+levelN n (NodeT _ ti td) = levelN (n - 1) ti ++ levelN (n - 1) td
+
+{-11. listPerLevel :: Tree a -> [[a]]
 Dado un árbol devuelve una lista de listas en la que cada elemento representa
-un nivel de dicho árbol.
-12. ramaMasLarga :: Tree a -> [a]
+un nivel de dicho árbol.-}
+
+
+{-12. ramaMasLarga :: Tree a -> [a]
 Devuelve los elementos de la rama más larga del árbol
 13. todosLosCaminos :: Tree a -> [[a]]
 Dado un árbol devuelve todos los caminos, es decir, los caminos desde la raíz
