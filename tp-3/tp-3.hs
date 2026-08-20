@@ -230,11 +230,25 @@ levelN n (NodeT _ ti td) = levelN (n - 1) ti ++ levelN (n - 1) td
 {-11. listPerLevel :: Tree a -> [[a]]
 Dado un árbol devuelve una lista de listas en la que cada elemento representa
 un nivel de dicho árbol.-}
+listPerLevel :: Tree a -> [[a]]
+listPerLevel EmptyT = []
+listPerLevel (NodeT x ti td) = [x] : unir (listPerLevel ti) (listPerLevel td)
 
+unir :: [[a]] -> [[a]] -> [[a]]
+unir [] [] = []
+unir [] ys = ys
+unir xs [] = xs
+unir (x:xs) (y:ys) = (x ++ y) : unir xs ys
 
 {-12. ramaMasLarga :: Tree a -> [a]
-Devuelve los elementos de la rama más larga del árbol
-13. todosLosCaminos :: Tree a -> [[a]]
+Devuelve los elementos de la rama más larga del árbol-}
+ramaMasLarga :: Tree a -> [a]
+ramaMasLarga EmptyT = []
+ramaMasLarga (NodeT x ti td) = if heightT ti > heightT td
+                                    then x : ramaMasLarga ti
+                                    else x : ramaMasLarga td
+
+{-13. todosLosCaminos :: Tree a -> [[a]]
 Dado un árbol devuelve todos los caminos, es decir, los caminos desde la raíz
 hasta cualquiera de los nodos.
 ATENCIÓN: se trata de todos los caminos, y no solamente de los maximales (o
@@ -245,9 +259,12 @@ EmptyT)
 EmptyT))
 = [ [1], [1,2], [1,2,3], [1,4], [1,4,5] ]
 OBSERVACIÓN: puede resultar interesante plantear otra función, variación de
-ésta para devolver solamente los caminos maximales.
-2.2. Expresiones Aritméticas
-El tipo algebraico ExpA modela expresiones aritméticas de la siguiente manera:
+ésta para devolver solamente los caminos maximales.-}
+todosLosCaminos :: Tree a -> [[a]]
+
+
+--2.2. Expresiones Aritméticas
+{-El tipo algebraico ExpA modela expresiones aritméticas de la siguiente manera:
 data ExpA = Valor Int
 | Sum ExpA ExpA
 | Prod ExpA ExpA
