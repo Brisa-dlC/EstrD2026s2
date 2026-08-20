@@ -2,8 +2,8 @@
 de la Cerda Dominique-}
 
 --1. Tipos recursivos simples
-{-1.1. Celdas con b olitas
-Representaremos una celda con b olitas de colores ro jas y azules, de la siguiente manera:-}
+{-1.1. Celdas con bolitas
+Representaremos una celda con bolitas de colores rojas y azules, de la siguiente manera:-}
 
 data Color = Azul | Rojo
  deriving (Show, Eq)
@@ -253,29 +253,68 @@ Dado un árbol devuelve todos los caminos, es decir, los caminos desde la raíz
 hasta cualquiera de los nodos.
 ATENCIÓN: se trata de todos los caminos, y no solamente de los maximales (o
 sea, de la raíz hasta la hoja), o sea, por ejemplo
-todosLosCaminos (NodeT 1 (NodeT 2 (NodeT 3 EmptyT EmptyT)
-EmptyT)
-(NodeT 4 (NodeT 5 EmptyT EmptyT)
-EmptyT))
+todosLosCaminos (NodeT 1 (NodeT 2 (NodeT 3 EmptyT EmptyT) EmptyT) (NodeT 4 (NodeT 5 EmptyT EmptyT) EmptyT))
 = [ [1], [1,2], [1,2,3], [1,4], [1,4,5] ]
+
+(NodeT 1 
+    (NodeT 2 
+        (NodeT 3 EmptyT EmptyT) 
+        EmptyT) 
+    (NodeT 4 
+        (NodeT 5 EmptyT EmptyT) 
+        EmptyT)
+)
+
 OBSERVACIÓN: puede resultar interesante plantear otra función, variación de
 ésta para devolver solamente los caminos maximales.-}
 todosLosCaminos :: Tree a -> [[a]]
+todosLosCaminos EmptyT = []
+todosLosCaminos (NodeT x ti td) =  [x] : unirRaiz x (todosLosCaminos ti) ++ unirRaiz x (todosLosCaminos td)
 
+unirRaiz :: a -> [[a]] -> [[a]]
+unirRaiz _ [] = []
+unirRaiz x (l:ls) = (x : l) : unirRaiz x ls
 
 --2.2. Expresiones Aritméticas
-{-El tipo algebraico ExpA modela expresiones aritméticas de la siguiente manera:
-data ExpA = Valor Int
-| Sum ExpA ExpA
-| Prod ExpA ExpA
-| Neg ExpA
-Implementar las siguientes funciones utilizando el esquema de recursión estructural sobre Exp:
+{-El tipo algebraico ExpA modela expresiones aritméticas de la siguiente manera:-}
+
+data ExpA = Valor Int | Sum ExpA ExpA | Prod ExpA ExpA | Neg ExpA
+ deriving Show
+
+{-Implementar las siguientes funciones utilizando el esquema de recursión estructural sobre Exp:
 1. eval :: ExpA -> Int
-Dada una expresión aritmética devuelve el resultado evaluarla.
-2. simplificar :: ExpA -> ExpA
+Dada una expresión aritmética devuelve el resultado evaluarla.-}
+eval :: ExpA -> Int
+eval (Valor x) = x
+eval (Sum x y) = (eval x) + (eval y)
+eval (Prod x y) = (eval x) * (eval y)
+eval (Neg x) = - (eval x)
+
+{-2. simplificar :: ExpA -> ExpA
 Dada una expresión aritmética, la simplifica según los siguientes criterios (descritos utilizando
 notación matemática convencional):
 a) 0 + x = x + 0 = x
 b) 0 * x = x * 0 = 0
 c) 1 * x = x * 1 = x
-d) - (- x) = x-}
+d) - (- x) = x -}
+simplificar :: ExpA -> ExpA
+simplificar (Sum x y) = simplificarSuma (simplificar x) (simplificar y)
+simplificar (Prod x y) = simplificarProd (simplificar x) (simplificar y)
+simplificar (Neg x) = simplificarNeg (simplificar x)
+simplificar x = x
+
+simplificarSuma :: ExpA -> ExpA -> ExpA
+simplificarSuma (Valor 0) x = x
+simplificarSuma x (Valor 0) = x
+simplificarSuma x y = Sum x y
+
+simplificarProd :: ExpA -> ExpA -> ExpA
+simplificarProd (Valor 0) x = (Valor 0)
+simplificarProd x (Valor 0) = (Valor 0)
+simplificarProd (Valor 1) x = x
+simplificarProd x (Valor 1) = x
+simplificarProd x y = Prod x y
+
+simplificarNeg :: ExpA -> ExpA
+simplificarNeg (Neg x) = x
+simplificarNeg x = (Neg x)
