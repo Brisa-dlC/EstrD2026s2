@@ -65,25 +65,80 @@ duplicarSiEsAceituna x = x
 Dada una lista de pizzas devuelve un par donde la primera componente es la cantidad de
 ingredientes de la pizza, y la respectiva pizza como segunda componente.-}
 cantCapasPorPizza :: [Pizza] -> [(Int, Pizza)]
-
+cantCapasPorPizza [] = []
+cantCapasPorPizza (p:ps) = (cantidadDeCapas p, p) : cantCapasPorPizza ps
 
 {-2. Mapa de tesoros (con bifurcaciones)
 Un mapa de tesoros es un árbol con bifurcaciones que terminan en cofres. Cada bifurcación y
-cada cofre tiene un objeto, que puede ser chatarra o un tesoro.
+cada cofre tiene un objeto, que puede ser chatarra o un tesoro.-}
+
 data Dir = Izq | Der
+ deriving (Show, Eq)
+
 data Objeto = Tesoro | Chatarra
+ deriving (Show, Eq)
+
 data Cofre = Cofre [Objeto]
-data Mapa = Fin Cofre
-| Bifurcacion Cofre Mapa Mapa
-Definir las siguientes operaciones:
+ deriving Show
+
+data Mapa = Fin Cofre | Bifurcacion Cofre Mapa Mapa
+ deriving Show
+
+mapa :: Mapa
+mapa = Bifurcacion cofreT (Bifurcacion cofreT (Fin cofreC) (Fin cofreC)) (Fin cofreC)
+
+cofreC :: Cofre 
+cofreC = Cofre [Chatarra]
+
+cofreT :: Cofre 
+cofreT = Cofre [Tesoro]
+
+{-Definir las siguientes operaciones:
 1. hayTesoro :: Mapa -> Bool
-Indica si hay un tesoro en alguna parte del mapa.
-2. hayTesoroEn :: [Dir] -> Mapa -> Bool
+Indica si hay un tesoro en alguna parte del mapa.-}
+hayTesoro :: Mapa -> Bool
+hayTesoro (Fin c) = tieneTesoro c
+hayTesoro (Bifurcacion c mi md) = tieneTesoro c || hayTesoro mi || hayTesoro md
+
+tieneTesoro :: Cofre -> Bool
+tieneTesoro (Cofre obs) = hayAlgunTesoro obs
+
+hayAlgunTesoro :: [Objeto] -> Bool
+hayAlgunTesoro [] = False
+hayAlgunTesoro (o:obs) = o == Tesoro || hayAlgunTesoro obs
+
+
+{-2. hayTesoroEn :: [Dir] -> Mapa -> Bool
 Indica si al final del camino hay un tesoro. Nota: el final de un camino se representa con una
-lista vacía de direcciones.
-3. caminoAlTesoro :: Mapa -> [Dir]
-Indica el camino al tesoro. Precondición: existe un tesoro y es único.
-4. caminoDeLaRamaMasLarga :: Mapa -> [Dir]
+lista vacía de direcciones.-}
+hayTesoroEn :: [Dir] -> Mapa -> Bool
+hayTesoroEn [] m = hayTesoro m 
+hayTesoroEn (d:ds) (Bifurcacion _ mi md) = if d == Izq
+                                            then hayTesoroEn ds mi
+                                            else hayTesoroEn ds md
+hayTesoroEn ds (Fin _) = error "El camino es mas largo que el mapa"
+
+{-3. caminoAlTesoro :: Mapa -> [Dir]
+Indica el camino al tesoro. Precondición: existe un tesoro y es único.-}
+caminoAlTesoro :: Mapa -> [Dir]
+--Precondición: existe un tesoro y es único.
+caminoAlTesoro (Fin c) = if tieneUnSoloTesoro c
+                            then []
+                            else error "No hay tesoros o hay mas de uno"
+caminoAlTesoro (Bifurcacion c mi md) = if tieneUnSoloTesoro c && (not (hayTesoro mi || hayTesoro md))
+                                            then []
+                                            else if hayTesoro mi
+                                                    then Izq: caminoAlTesoro mi
+                                                    else Der: caminoAlTesoro md
+
+tieneUnSoloTesoro :: Cofre -> Bool
+tieneUnSoloTesoro (Cofre obs) = unSoloTesoro obs
+
+unSoloTesoro :: [Objeto] -> Bool
+unSoloTesoro [] = False
+unSoloTesoro (o:obs) = (o == Tesoro && not (unSoloTesoro obs)) || (not (o == Tesoro) && unSoloTesoro obs )
+
+{-4. caminoDeLaRamaMasLarga :: Mapa -> [Dir]
 Indica el camino de la rama más larga.
 5. tesorosPorNivel :: Mapa -> [[Objeto]]
 Devuelve los tesoros separados por nivel en el árbol.
